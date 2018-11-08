@@ -1,0 +1,150 @@
+---
+- hosts:  
+  become: yes
+  tasks:
+
+## Patch ##
+
+   - name: Clean yum cache
+     file:
+       path: /var/cache/yum/
+       state: absent
+
+   - name: Update all packages
+     yum:
+       name: '*'
+       state: latest
+
+   - name: Make sure all packages are updated
+     shell: yum -y update
+     args:
+       warn: false
+
+   - name: Clean yum cache
+     file:
+       path: /var/cache/yum/
+       state: absent
+
+## SCOM ##
+
+   - name: Remove if there is existing SCOM account
+     user:
+       name: SCOM
+       state: absent
+       remove: yes
+     ignore_errors: yes
+
+   - name: Create SCOM local account
+     user:
+       name: SCOM
+       password: "{{ password }}" 
+       shell: /bin/bash
+       state: present
+     tags: user
+
+   - name: Add an entry in sudoers file
+     lineinfile:
+       path: /etc/sudoers
+       line: '{{ item }}'
+     with_items:
+       - SCOM    ALL=(ALL)       NOPASSWD:ALL
+       - Defaults:SCOM !requiretty
+
+## NetBackup ##
+
+   - name: Kill existing NetBackup processes
+     shell: /usr/openv/netbackup/bin/bp.kill_all
+     ignore_errors: yes
+
+   - name: Delete openv
+     file:
+       path: /usr/openv
+       state: absent
+     ignore_errors: yes
+
+   - name: Copy NetBackup - May take awhile ¯\_(ツ)_/¯
+     synchronize:
+       src: /data/NetBackup_7.7.3_CLIENTS
+       dest: /
+     delegate_to: localhost
+     tags: netbackup
+ 
+   - name: Update permissions
+     file:
+       path: /NetBackup_7.7.3_CLIENTS
+       state: directory
+       mode: 0755
+
+   - name: Install NetBackup
+     shell: printf 'y\ny\n{{ netbackup_master_server }}\ny\ny' | /NetBackup_7.7.3_CLIENTS/install.sh
+
+   - name: Update Netbackup configuration file
+     lineinfile:
+       dest: /usr/openv/netbackup/bp.conf
+       line: '{{ item }}'
+     with_items:
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  MEDIA_SERVER = 
+       -  LOCKED_FILE_ACTION = WAIT
+       -  CLIENT_READ_TIMEOUT = 450
+
+   - name: Restart NetBackup Service
+     service: name=netbackup state=restarted
+     tags: netbackup
+
+   - name: Start the service if stopped
+     service: name=netbackup state=started
+     tags: netbackup
+
+## Trend Deep Security ## AO ##
+
+   - name: Remove ds_agent rpm if exists
+     yum:
+       name: ds_agent
+       state: absent
+     ignore_errors: yes
+
+   - name: Install Deep Security Agent - AO Intranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_intranet
+     when: ansible_domain == "aaaclubnet.com"
+ 
+   - name: Install Deep Security Agent - AO Inet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_aceinet
+     when: ansible_domain == "aceinet.com"
+   
+   - name: Install Deep Security Agent - AO Extranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_acexnet
+     when: ansible_domain == "acexnet.com"
+
+## Trend Deep Security ## TX ##
+
+   - name: Remove ds_agent rpm if exists
+     yum:
+       name: ds_agent
+       state: absent
+     ignore_errors: yes
+
+   - name: Install Deep Security Agent - TX Intranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_intranet
+     when: ansible_domain == "aaaclubnet.com"
+
+   - name: Install Deep Security Agent - TX Inet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_aceinet
+     when: ansible_domain == "aceinet"
+
+   - name: Install Deep Security Agent - TX Extranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_acexnet
+     when: ansible_domain == "acexnet"
+      
+## Cleanup
+
+  post_tasks:
+   - name: Delete NetBackup Directory
+     file:
+       path: /NetBackup_7.7.3_CLIENTS
+       state: absent

@@ -110,15 +110,15 @@
      ignore_errors: yes
 
    - name: Install Deep Security Agent - Intranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_intranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
      when: ansible_domain == "ansible.com"
  
    - name: Install Deep Security Agent - Inet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_aceinet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
      when: ansible_domain == "ansible1.com"
    
    - name: Install Deep Security Agent - Extranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_acexnet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
      when: ansible_domain == "ansible2.com"
 
 ## Trend Deep Security ## TX ##

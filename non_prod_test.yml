@@ -109,17 +109,17 @@
        state: absent
      ignore_errors: yes
 
-   - name: Install Deep Security Agent - AO Intranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_intranet
-     when: ansible_domain == "aaaclubnet.com"
+   - name: Install Deep Security Agent - Intranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_intranet
+     when: ansible_domain == "ansible.com"
  
-   - name: Install Deep Security Agent - AO Inet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_aceinet
-     when: ansible_domain == "aceinet.com"
+   - name: Install Deep Security Agent - Inet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_aceinet
+     when: ansible_domain == "ansible1.com"
    
-   - name: Install Deep Security Agent - AO Extranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_AO_acexnet
-     when: ansible_domain == "acexnet.com"
+   - name: Install Deep Security Agent - Extranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent_acexnet
+     when: ansible_domain == "ansible2.com"
 
 ## Trend Deep Security ## TX ##
 
@@ -129,17 +129,17 @@
        state: absent
      ignore_errors: yes
 
-   - name: Install Deep Security Agent - TX Intranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_intranet
-     when: ansible_domain == "aaaclubnet.com"
+   - name: Install Deep Security Agent - Intranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
+     when: ansible_domain == "ansible"
 
-   - name: Install Deep Security Agent - TX Inet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_aceinet
-     when: ansible_domain == "aceinet"
+   - name: Install Deep Security Agent - Inet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
+     when: ansible_domain == "ansible1"
 
-   - name: Install Deep Security Agent - TX Extranet
-     script: /etc/ansible/new_build_configuration/Linux/ds_agent_TX_acexnet
-     when: ansible_domain == "acexnet"
+   - name: Install Deep Security Agent - Extranet
+     script: /etc/ansible/new_build_configuration/Linux/ds_agent
+     when: ansible_domain == "ansible2"
       
 ## Cleanup
 
